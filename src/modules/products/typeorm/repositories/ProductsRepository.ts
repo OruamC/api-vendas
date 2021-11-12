@@ -21,7 +21,7 @@ export class ProductRepository extends Repository<Product> {
 
     const existsProducts = await this.find({
       where: {
-        id: In(products),
+        id: In(productsIds),
       },
     });
 

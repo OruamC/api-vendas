@@ -17,17 +17,17 @@ interface IRequest {
 
 class CreateOrderService {
   public async execute({ customer_id, products }: IRequest): Promise<Order> {
-    const orderRepository = getCustomRepository(OrdersRepository);
-    const customerRepository = getCustomRepository(CustomersRepository);
-    const productRepository = getCustomRepository(ProductRepository);
+    const ordersRepository = getCustomRepository(OrdersRepository);
+    const customersRepository = getCustomRepository(CustomersRepository);
+    const productsRepository = getCustomRepository(ProductRepository);
 
-    const customerExists = await customerRepository.findById(customer_id);
+    const customerExists = await customersRepository.findById(customer_id);
 
     if (!customerExists) {
       throw new AppError('Could not find any customer with the given id.');
     }
 
-    const existsProducts = await productRepository.findAllByIds(products);
+    const existsProducts = await productsRepository.findAllByIds(products);
 
     if (!existsProducts.length) {
       throw new AppError('Could not find any products with the given ids.');
@@ -41,7 +41,7 @@ class CreateOrderService {
 
     if (checkInexistentProducts.length) {
       throw new AppError(
-        `Could not find any product ${checkInexistentProducts[0].id}.`,
+        `Could not find product ${checkInexistentProducts[0].id}.`,
       );
     }
 
@@ -53,7 +53,8 @@ class CreateOrderService {
 
     if (quantityAvailable.length) {
       throw new AppError(
-        `The quantity ${quantityAvailable[0].quantity} is not available for ${quantityAvailable[0].id}.`,
+        `The quantity ${quantityAvailable[0].quantity}
+         is not available for ${quantityAvailable[0].id}.`,
       );
     }
 
@@ -63,7 +64,7 @@ class CreateOrderService {
       price: existsProducts.filter(p => p.id === product.id)[0].price,
     }));
 
-    const order = await orderRepository.createOrder({
+    const order = await ordersRepository.createOrder({
       customer: customerExists,
       products: serializedProducts,
     });
@@ -77,7 +78,7 @@ class CreateOrderService {
         product.quantity,
     }));
 
-    await productRepository.save(updatedProductQuantity);
+    await productsRepository.save(updatedProductQuantity);
 
     return order;
   }
